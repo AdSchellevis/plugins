@@ -57,4 +57,17 @@ abstract class ImportType
             "errors" => $this->importErrors,
         );
     }
+
+    public function printReport()
+    {
+        echo "[".get_class($this)."]\n";
+        echo "inserted : {$this->insertCount}\n";
+        echo "updated : {$this->updateCount}\n";
+        if (!empty($this->importErrors)) {
+            echo "import errors (per identifier):\n";
+            foreach ($this->importErrors as $error) {
+                echo "\t{$error['name']} : {$error['message']}\n";
+            }
+        }
+    }
 }

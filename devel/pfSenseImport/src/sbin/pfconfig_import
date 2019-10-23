@@ -27,13 +27,14 @@
  */
 require_once("script/load_phalcon.php");
 
-$opts = getopt('ah', array(), $optind);
+$opts = getopt('avh', array(), $optind);
 $args = array_slice($argv, $optind);
 
 if (isset($opts['h']) || empty($args[0])) {
     echo "Usage: config_import [-h] -[a] <sourceXml>\n\n";
     echo "\t-h show this help text and exit\n";
     echo "\t-a Import aliases\n";
+    echo "\t-v Import VIPs\n";
     exit(0);
 }
 if (isset($opts['a'])) {
@@ -41,12 +42,11 @@ if (isset($opts['a'])) {
     $aliasImport = new \OPNsense\pfSenseImport\Alias($args[0]);
     $aliasImport->import();
     $report = $aliasImport->getReport();
-    echo "inserted : {$report['inserted']}\n";
-    echo "updated : {$report['updated']}\n";
-    if (!empty($report['errors'])) {
-        echo "import errors (per alias name):\n";
-        foreach ($report['errors'] as $error) {
-            echo "\t{$error['name']} : {$error['message']}\n";
-        }
-    }
+    $aliasImport->printReport();
+}
+if (isset($opts['v'])) {
+    // import and validate aliases
+    $aliasImport = new \OPNsense\pfSenseImport\Vip($args[0]);
+    $aliasImport->import();
+    $aliasImport->printReport();
 }

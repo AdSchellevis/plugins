@@ -35,9 +35,6 @@ class Alias extends ImportType
 
     public function import()
     {
-        $this->insertCount = 0;
-        $this->updateCount = 0;
-        $this->importErrors = array();
         $aliasImportMap = array();
         $aliasUuidMap = array();
         $aliasMdl = new \OPNsense\Firewall\Alias();

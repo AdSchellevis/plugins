@@ -30,18 +30,9 @@ namespace OPNsense\pfSenseImport;
 
 use \OPNsense\Core\Config;
 
-class Alias
+class Alias extends ImportType
 {
-    private $sourceXml = null;
-    private $importErrors = array();
-    private $insertCount = 0;
-    private $updateCount = 0;
-    public function __construct($source)
-    {
-        if (file_exists($source)) {
-            $this->sourceXml = simplexml_load_file($source);
-        }
-    }
+
     public function import()
     {
         $this->insertCount = 0;
@@ -120,14 +111,5 @@ class Alias
             $aliasMdl->serializeToConfig();
             Config::getInstance()->save();
         }
-    }
-
-    public function getReport()
-    {
-        return array(
-            "inserted" => $this->insertCount,
-            "updated" => $this->updateCount,
-            "errors" => $this->importErrors,
-        );
     }
 }

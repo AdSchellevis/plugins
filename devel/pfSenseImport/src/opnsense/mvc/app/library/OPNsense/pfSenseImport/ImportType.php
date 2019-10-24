@@ -32,6 +32,7 @@ use \OPNsense\Core\Config;
 
 abstract class ImportType
 {
+    private $configured_interfaces = array();
     protected $sourceXml = null;
     protected $importErrors = array();
     protected $insertCount = 0;
@@ -42,6 +43,14 @@ abstract class ImportType
         if (file_exists($source)) {
             $this->sourceXml = simplexml_load_file($source);
         }
+        foreach (Config::getInstance()->object()->interfaces->children() as $ifname => $ifcnf) {
+            $this->configured_interfaces[] = $ifname;
+        }
+    }
+
+    protected function hasInterface($name)
+    {
+        return !empty($name) && in_array($name, $this->configured_interfaces);
     }
 
     public function import()

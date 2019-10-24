@@ -35,12 +35,8 @@ class Vip extends ImportType
 {
     public function import()
     {
-        if (!empty($this->sourceXml->virtualip) && !empty($this->sourceXml->virtualip)) {
-            $configured_interfaces = [];
+        if (!empty($this->sourceXml->virtualip) && !empty($this->sourceXml->virtualip->vip)) {
             Config::getInstance()->lock();
-            foreach (Config::getInstance()->object()->interfaces->children() as $ifname => $ifcnf) {
-                $configured_interfaces[] = $ifname;
-            }
             foreach ($this->sourceXml->virtualip->vip as $srcVip) {
                 $this_id = "[" . (!empty($srcVip->interface) ? $srcVip->interface : "?") . "]";
                 $this_id .= !empty($srcVip->subnet) ? $srcVip->subnet : "?";
@@ -79,7 +75,7 @@ class Vip extends ImportType
                         continue;
                     }
                 }
-                if (!in_array($srcVip->interface, $configured_interfaces)) {
+                if (!$this->hasInterface($srcVip->interface)) {
                     $this->importErrors[] = array(
                         "name" => $this_id,
                         "details" => json_encode($srcVip),
@@ -108,8 +104,8 @@ class Vip extends ImportType
                           'password', 'descr', 'type', 'subnet_bits', 'subnet'] as $prop) {
                     if (isset($srcVip->$prop)) {
                         $vipEntry->$prop = $srcVip->$prop;
-                    } elseif (isset($srcVip->$prop)) {
-                        $srcVip->$prop = null;
+                    } elseif (isset($vipEntry->$prop)) {
+                        $vipEntry->$prop = null;
                     }
                 }
             }

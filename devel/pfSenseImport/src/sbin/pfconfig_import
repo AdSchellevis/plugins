@@ -27,7 +27,8 @@
  */
 require_once("script/load_phalcon.php");
 
-$opts = getopt('avh', array(), $optind);
+
+$opts = getopt('avnh', array(), $optind);
 $args = array_slice($argv, $optind);
 
 if (isset($opts['h']) || empty($args[0])) {
@@ -35,18 +36,18 @@ if (isset($opts['h']) || empty($args[0])) {
     echo "\t-h show this help text and exit\n";
     echo "\t-a Import aliases\n";
     echo "\t-v Import VIPs\n";
+    echo "\t-n Import Nat rules\n";
     exit(0);
 }
-if (isset($opts['a'])) {
-    // import and validate aliases
-    $aliasImport = new \OPNsense\pfSenseImport\Alias($args[0]);
-    $aliasImport->import();
-    $report = $aliasImport->getReport();
-    $aliasImport->printReport();
-}
-if (isset($opts['v'])) {
-    // import and validate aliases
-    $aliasImport = new \OPNsense\pfSenseImport\Vip($args[0]);
-    $aliasImport->import();
-    $aliasImport->printReport();
+$importClasses = array(
+    "a" => "\OPNsense\pfSenseImport\Alias",
+    "v" => "\OPNsense\pfSenseImport\Vip",
+    "n" => "\OPNsense\pfSenseImport\Nat",
+);
+foreach ($importClasses as $tag => $cls) {
+    if (isset($opts[$tag])) {
+        $imprt = new $cls($args[0]);
+        $imprt->import();
+        $imprt->printReport();
+    }
 }

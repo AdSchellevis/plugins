@@ -48,6 +48,14 @@ abstract class ImportType
         }
     }
 
+    protected function replaceXmlNode(\SimpleXMLElement $source, \SimpleXMLElement $target)
+    {
+        $targetDom = dom_import_simplexml($target);
+        $sourceDom  = dom_import_simplexml($source);
+        $nodeImport  = $targetDom->ownerDocument->importNode($sourceDom, TRUE);
+        $targetDom->parentNode->replaceChild($nodeImport, $targetDom);
+    }
+
     protected function hasInterface($name)
     {
         return !empty($name) && in_array($name, $this->configured_interfaces);

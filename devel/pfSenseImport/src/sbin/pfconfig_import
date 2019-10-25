@@ -26,27 +26,32 @@
  *    POSSIBILITY OF SUCH DAMAGE.
  */
 require_once("script/load_phalcon.php");
+require_once("interfaces.lib.inc");
 
 
-$opts = getopt('avnh', array(), $optind);
+$opts = getopt('avVnh', array(), $optind);
 $args = array_slice($argv, $optind);
 
 if (isset($opts['h']) || empty($args[0])) {
-    echo "Usage: config_import [-h] -[a] <sourceXml>\n\n";
+    echo "Usage: pfconfig_import [-h] -[a] <sourceXml>\n\n";
     echo "\t-h show this help text and exit\n";
     echo "\t-a Import aliases\n";
     echo "\t-v Import VIPs\n";
+    echo "\t-V Import Vlans\n";
     echo "\t-n Import Nat rules\n";
     exit(0);
 }
 $importClasses = array(
     "a" => "\OPNsense\pfSenseImport\Alias",
+    "V" => "\OPNsense\pfSenseImport\Vlan",
     "v" => "\OPNsense\pfSenseImport\Vip",
     "n" => "\OPNsense\pfSenseImport\Nat",
 );
+$ifdetails = legacy_interfaces_details();
 foreach ($importClasses as $tag => $cls) {
     if (isset($opts[$tag])) {
         $imprt = new $cls($args[0]);
+        $imprt->setInterfaceDetails($ifdetails);
         $imprt->import();
         $imprt->printReport();
     }

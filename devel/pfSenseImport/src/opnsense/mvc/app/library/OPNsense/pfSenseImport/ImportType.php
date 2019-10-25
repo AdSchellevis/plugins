@@ -37,6 +37,7 @@ abstract class ImportType
     protected $importErrors = array();
     protected $insertCount = 0;
     protected $updateCount = 0;
+    protected $ifdetails = array();
 
     public function __construct($source)
     {
@@ -46,6 +47,11 @@ abstract class ImportType
         foreach (Config::getInstance()->object()->interfaces->children() as $ifname => $ifcnf) {
             $this->configured_interfaces[] = $ifname;
         }
+    }
+
+    public function setInterfaceDetails($ifdetails)
+    {
+        $this->ifdetails = $ifdetails;
     }
 
     protected function replaceXmlNode(\SimpleXMLElement $source, \SimpleXMLElement $target)

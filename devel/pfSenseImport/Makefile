@@ -1,5 +1,5 @@
 PLUGIN_NAME=		pfSenseImport
-PLUGIN_VERSION=		0.1
+PLUGIN_VERSION=		0.2
 PLUGIN_COMMENT=		Import and validate (partial) pfSense configuration data into the running configuration.
 PLUGIN_MAINTAINER=	ad@opnsense.org
 

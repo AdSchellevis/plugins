@@ -33,6 +33,7 @@ use \OPNsense\Core\Config;
 abstract class ImportType
 {
     private $configured_interfaces = array();
+    private $configured_interface_groups = array();
     protected $sourceXml = null;
     protected $importErrors = array();
     protected $insertCount = 0;
@@ -46,6 +47,9 @@ abstract class ImportType
         }
         foreach (Config::getInstance()->object()->interfaces->children() as $ifname => $ifcnf) {
             $this->configured_interfaces[] = $ifname;
+        }
+        foreach (Config::getInstance()->object()->ifgroups->children() as $ifcnf) {
+            $this->configured_interface_groups[] = $ifcnf->ifname;
         }
     }
 
@@ -66,6 +70,12 @@ abstract class ImportType
     {
         return !empty($name) && in_array($name, $this->configured_interfaces);
     }
+
+    protected function hasInterfaceGroup($name)
+    {
+        return !empty($name) && in_array($name, $this->configured_interface_groups);
+    }
+
 
     public function import()
     {

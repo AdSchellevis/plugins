@@ -66,7 +66,7 @@ class Nat extends ImportType
             Config::getInstance()->lock();
             foreach ($this->sourceXml->nat->rule as $srcRule) {
                 $this_id = $this->genRuleId($srcRule);
-                if (!$this->hasInterface($srcRule->interface)) {
+                if (!$this->hasInterface($srcRule->interface) && !$this->hasInterfaceGroup($srcRule->interface)) {
                     $this->importErrors[] = array(
                         "name" => $this_id,
                         "details" => json_encode($srcRule),

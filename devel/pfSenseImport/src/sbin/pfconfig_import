@@ -29,7 +29,7 @@ require_once("script/load_phalcon.php");
 require_once("interfaces.lib.inc");
 
 
-$opts = getopt('aLIvVnh', array(), $optind);
+$opts = getopt('aLIvVnhg', array(), $optind);
 $args = array_slice($argv, $optind);
 
 if (isset($opts['h']) || empty($args[0])) {
@@ -37,6 +37,7 @@ if (isset($opts['h']) || empty($args[0])) {
     echo "\t-h show this help text and exit\n";
     echo "\t-a Import aliases\n";
     echo "\t-I Import Interfaces\n";
+    echo "\t-g Import Interface groups\n";
     echo "\t-L Import Laggs\n";
     echo "\t-v Import VIPs\n";
     echo "\t-V Import Vlans\n";
@@ -48,6 +49,7 @@ $importClasses = array(
     "V" => "\OPNsense\pfSenseImport\Vlan",
     "L" => "\OPNsense\pfSenseImport\Lagg",
     "I" => "\OPNsense\pfSenseImport\Intf",
+    "g" => "\OPNsense\pfSenseImport\Ifgroup",
     "v" => "\OPNsense\pfSenseImport\Vip",
     "n" => "\OPNsense\pfSenseImport\Nat",
 );

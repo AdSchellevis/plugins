@@ -29,7 +29,7 @@ require_once("script/load_phalcon.php");
 require_once("interfaces.lib.inc");
 
 
-$opts = getopt('aLIvVnhgo', array(), $optind);
+$opts = getopt('aLIvVnhgoOf', array(), $optind);
 $args = array_slice($argv, $optind);
 
 if (isset($opts['h']) || empty($args[0])) {
@@ -43,6 +43,8 @@ if (isset($opts['h']) || empty($args[0])) {
     echo "\t-V Import Vlans\n";
     echo "\t-n Import Nat rules\n";
     echo "\t-o Import Outbound Nat rules\n";
+    echo "\t-O Import One to One Nat rules\n";
+    echo "\t-f Import filter rules\n";
     exit(0);
 }
 $importClasses = array(
@@ -54,6 +56,8 @@ $importClasses = array(
     "v" => "\OPNsense\pfSenseImport\Vip",
     "n" => "\OPNsense\pfSenseImport\Nat",
     "o" => "\OPNsense\pfSenseImport\OutboundNat",
+    "O" => "\OPNsense\pfSenseImport\NatOneToOne",
+    "f" => "\OPNsense\pfSenseImport\Filter"
 );
 $ifdetails = legacy_interfaces_details();
 foreach ($importClasses as $tag => $cls) {

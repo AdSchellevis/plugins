@@ -33,23 +33,6 @@ use \OPNsense\Firewall\Util;
 
 class Nat extends ImportType
 {
-    private function pconfigToString($adr)
-    {
-        $result = !empty($adr->not) ? "!" : "";
-        if (isset($adr->any)) {
-            $result .= "any";
-        } else {
-            if (!empty($adr->network)) {
-                $result .= $adr->network;
-            } elseif (!empty($adr->address)) {
-                $result .= $adr->address;
-            }
-            if (!empty($adr->port)) {
-                $result .= ":" . $adr->port;
-            }
-        }
-        return $result;
-    }
 
     private function genRuleId($rule)
     {

@@ -76,6 +76,23 @@ abstract class ImportType
         return !empty($name) && in_array($name, $this->configured_interface_groups);
     }
 
+    protected function pconfigToString($adr)
+    {
+        $result = !empty($adr->not) ? "!" : "";
+        if (isset($adr->any)) {
+            $result .= "any";
+        } else {
+            if (!empty($adr->network)) {
+                $result .= $adr->network;
+            } elseif (!empty($adr->address)) {
+                $result .= $adr->address;
+            }
+            if (!empty($adr->port)) {
+                $result .= ":" . $adr->port;
+            }
+        }
+        return $result;
+    }
 
     public function import()
     {

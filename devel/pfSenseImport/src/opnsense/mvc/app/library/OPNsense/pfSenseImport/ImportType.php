@@ -45,11 +45,15 @@ abstract class ImportType
         if (file_exists($source)) {
             $this->sourceXml = simplexml_load_file($source);
         }
-        foreach (Config::getInstance()->object()->interfaces->children() as $ifname => $ifcnf) {
-            $this->configured_interfaces[] = $ifname;
+        if (!empty(Config::getInstance()->object()->interfaces)) {
+            foreach (Config::getInstance()->object()->interfaces->children() as $ifname => $ifcnf) {
+                $this->configured_interfaces[] = $ifname;
+            }
         }
-        foreach (Config::getInstance()->object()->ifgroups->children() as $ifcnf) {
-            $this->configured_interface_groups[] = $ifcnf->ifname;
+        if (!empty(Config::getInstance()->object()->ifgroups)) {
+            foreach (Config::getInstance()->object()->ifgroups->children() as $ifcnf) {
+                $this->configured_interface_groups[] = $ifcnf->ifname;
+            }
         }
     }
 

@@ -77,6 +77,9 @@ class OutboundNat extends ImportType
                 } else {
                     $this->updateCount++;
                 }
+                if (isset($srcRule->nonat)) {
+                    $srcRule->nonat = "1";
+                }
                 $this->replaceXmlNode($srcRule, $natEntry);
             }
             Config::getInstance()->save();

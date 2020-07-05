@@ -36,6 +36,8 @@ class OutboundNat extends ImportType
     private function genRuleId($rule)
     {
         $result = (!empty($rule->interface) ? $rule->interface : "?") . "|";
+        $result .= (!empty($rule->protocol) ? $rule->protocol : "?") . "|";
+        $result .= (!empty($rule->ipprotocol) ? $rule->ipprotocol : "inet") . "|";
         $result .= !empty($rule->source) ? $this->pconfigToString($rule->source) : "?";
         $result .= !empty($rule->sourceport) ? ":" . $rule->sourceport : ":?";
         $result .= "->";

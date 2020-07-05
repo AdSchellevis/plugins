@@ -37,6 +37,8 @@ class Nat extends ImportType
     private function genRuleId($rule)
     {
         $result = (!empty($rule->interface) ? $rule->interface : "?") . "|";
+        $result .= (!empty($rule->protocol) ? $rule->protocol : "?") . "|";
+        $result .= (!empty($rule->ipprotocol) ? $rule->ipprotocol : "inet") . "|";
         $result .= !empty($rule->source) ? $this->pconfigToString($rule->source) : "?";
         $result .= "->";
         $result .= !empty($rule->destination) ? $this->pconfigToString($rule->destination) : "?";

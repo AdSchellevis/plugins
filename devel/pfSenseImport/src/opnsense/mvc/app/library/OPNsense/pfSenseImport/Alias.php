@@ -65,6 +65,7 @@ class Alias extends ImportType
                 }
                 // update target object
                 $alias->name = (string)$srcAlias->name;
+                $alias->description = (string)$srcAlias->descr;
                 $alias->type = (string)$srcAlias->type;
                 if ($srcAlias->url) {
                     // url content only contains a single item

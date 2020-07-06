@@ -59,7 +59,7 @@ class Filter extends ImportType
                     $floatingIntf = implode(",", $this->filterKnownInterfaces($srcRule->interface));
                 }
                 if (!$this->hasInterface($srcRule->interface) && !$this->hasInterfaceGroup($srcRule->interface)
-                      && empty($floatingIntf)) {
+                      && empty($floatingIntf) && !empty($srcRule->interface)) {
                     $this->importErrors[] = array(
                         "name" => $this_id,
                         "details" => json_encode($srcRule),

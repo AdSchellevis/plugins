@@ -86,6 +86,9 @@ class Filter extends ImportType
                 if (!empty($floatingIntf)) {
                     $srcRule->interface = $floatingIntf;
                 }
+                if (isset($srcRule->disabled)) {
+                    $srcRule->disabled = "1";
+                }
                 // remove pfSense specific and empty attributes
                 if (isset($srcRule->tracker)) {
                     unset($srcRule->tracker);

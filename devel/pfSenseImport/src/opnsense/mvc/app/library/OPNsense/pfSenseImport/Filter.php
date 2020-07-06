@@ -47,13 +47,19 @@ class Filter extends ImportType
         return $result;
     }
 
+
     public function import()
     {
         if (!empty($this->sourceXml->filter) && !empty($this->sourceXml->filter->rule)) {
             Config::getInstance()->lock();
             foreach ($this->sourceXml->filter->rule as $srcRule) {
                 $this_id = $this->genRuleId($srcRule);
-                if (!$this->hasInterface($srcRule->interface) && !$this->hasInterfaceGroup($srcRule->interface)) {
+                $floatingIntf = null;
+                if (!empty($srcRule->floating)) {
+                    $floatingIntf = implode(",", $this->filterKnownInterfaces($srcRule->interface));
+                }
+                if (!$this->hasInterface($srcRule->interface) && !$this->hasInterfaceGroup($srcRule->interface)
+                      && empty($floatingIntf)) {
                     $this->importErrors[] = array(
                         "name" => $this_id,
                         "details" => json_encode($srcRule),
@@ -76,6 +82,9 @@ class Filter extends ImportType
                     $this->insertCount++;
                 } else {
                     $this->updateCount++;
+                }
+                if (!empty($floatingIntf)) {
+                    $srcRule->interface = $floatingIntf;
                 }
                 // remove pfSense specific and empty attributes
                 if (isset($srcRule->tracker)) {

@@ -80,6 +80,17 @@ abstract class ImportType
         return !empty($name) && in_array($name, $this->configured_interface_groups);
     }
 
+    protected function filterKnownInterfaces($names)
+    {
+        $result = [];
+        foreach (explode(",", $names) as $name) {
+            if ($this->hasInterface($name) || $this->hasInterfaceGroup($name)) {
+                $result[] = $name;
+            }
+        }
+        return $result;
+    }
+
     protected function pconfigToString($adr)
     {
         $result = !empty($adr->not) ? "!" : "";

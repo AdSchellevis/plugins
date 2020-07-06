@@ -102,9 +102,9 @@ abstract class ImportType
             } elseif (!empty($adr->address)) {
                 $result .= $adr->address;
             }
-            if (!empty($adr->port)) {
-                $result .= ":" . $adr->port;
-            }
+        }
+        if (!empty($adr->port)) {
+            $result .= ":" . $adr->port;
         }
         return $result;
     }

@@ -69,16 +69,16 @@ class Filter extends ImportType
                 }
                 // add / update rule
                 $target = Config::getInstance()->object();
-                $nat = isset($target->filter) ? $target->filter : $target->addChild("filter");
-                $natEntry = null;
-                foreach ($nat->children() as $rule) {
+                $filter = isset($target->filter) ? $target->filter : $target->addChild("filter");
+                $filterEntry = null;
+                foreach ($filter->children() as $rule) {
                     if ($this->genRuleId($rule) == $this_id) {
-                        $natEntry = $rule;
+                        $filterEntry = $rule;
                         break;
                     }
                 }
-                if ($natEntry == null) {
-                    $natEntry = $nat->addChild("rule");
+                if ($filterEntry == null) {
+                    $filterEntry = $filter->addChild("rule");
                     $this->insertCount++;
                 } else {
                     $this->updateCount++;
@@ -95,7 +95,7 @@ class Filter extends ImportType
                         unset($srcRule->$tagname);
                     }
                 }
-                $this->replaceXmlNode($srcRule, $natEntry);
+                $this->replaceXmlNode($srcRule, $filterEntry);
             }
             Config::getInstance()->save();
         }

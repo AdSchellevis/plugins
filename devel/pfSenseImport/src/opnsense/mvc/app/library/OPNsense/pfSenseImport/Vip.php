@@ -75,7 +75,7 @@ class Vip extends ImportType
                         continue;
                     }
                 }
-                if (!$this->hasInterface($srcVip->interface)) {
+                if (!$this->hasInterface($srcVip->interface) && $srcVip->interface != "lo0") {
                     $this->importErrors[] = array(
                         "name" => $this_id,
                         "details" => json_encode($srcVip),

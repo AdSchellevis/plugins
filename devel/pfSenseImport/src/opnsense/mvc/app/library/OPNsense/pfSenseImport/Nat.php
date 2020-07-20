@@ -34,47 +34,27 @@ use \OPNsense\Firewall\Util;
 class Nat extends ImportType
 {
 
-    private function genRuleId($rule)
-    {
-        $result = (!empty($rule->interface) ? $rule->interface : "?") . "|";
-        $result .= (!empty($rule->protocol) ? $rule->protocol : "?") . "|";
-        $result .= (!empty($rule->ipprotocol) ? $rule->ipprotocol : "inet") . "|";
-        $result .= !empty($rule->source) ? $this->pconfigToString($rule->source) : "?";
-        $result .= "->";
-        $result .= !empty($rule->destination) ? $this->pconfigToString($rule->destination) : "?";
-        return $result;
-    }
-
     public function import()
     {
         if (!empty($this->sourceXml->nat) && !empty($this->sourceXml->nat->rule)) {
             Config::getInstance()->lock();
+            $target = Config::getInstance()->object();
+            if (isset($target->nat->rule)) {
+                unset($target->nat->rule);
+            }
             foreach ($this->sourceXml->nat->rule as $srcRule) {
-                $this_id = $this->genRuleId($srcRule);
                 if (!$this->hasInterface($srcRule->interface) && !$this->hasInterfaceGroup($srcRule->interface)) {
                     $this->importErrors[] = array(
-                        "name" => $this_id,
+                        "name" => !empty($srcRule->descr) ? (string)$srcRule->descr : "",
                         "details" => json_encode($srcRule),
-                        "message" => "Interface not configured"
+                        "message" => "Interface not configured " . $srcRule->interface
                       );
                     continue;
                 }
                 // add / update rule
-                $target = Config::getInstance()->object();
                 $nat = isset($target->nat) ? $target->nat : $target->addChild("nat");
-                $natEntry = null;
-                foreach ($nat->children() as $rule) {
-                    if ($this->genRuleId($rule) == $this_id) {
-                        $natEntry = $rule;
-                        break;
-                    }
-                }
-                if ($natEntry == null) {
-                    $natEntry = $nat->addChild("rule");
-                    $this->insertCount++;
-                } else {
-                    $this->updateCount++;
-                }
+                $natEntry = $nat->addChild("rule");
+                $this->insertCount++;
                 $this->replaceXmlNode($srcRule, $natEntry);
             }
             Config::getInstance()->save();

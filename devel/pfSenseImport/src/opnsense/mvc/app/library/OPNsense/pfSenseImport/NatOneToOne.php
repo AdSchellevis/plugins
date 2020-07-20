@@ -33,46 +33,27 @@ use \OPNsense\Firewall\Util;
 
 class NatOneToOne extends ImportType
 {
-
-    private function genRuleId($rule)
-    {
-        $result = (!empty($rule->interface) ? $rule->interface : "?") . "|";
-        $result .= !empty($rule->source) ? $this->pconfigToString($rule->source) : "?";
-        $result .= "->";
-        $result .= !empty($rule->destination) ? $this->pconfigToString($rule->destination) : "?";
-        return $result;
-    }
-
     public function import()
     {
         if (!empty($this->sourceXml->nat) && !empty($this->sourceXml->nat->onetoone)) {
             Config::getInstance()->lock();
+            $target = Config::getInstance()->object();
+            if (isset($target->nat->onetoone)) {
+                unset($target->nat->onetoone);
+            }
             foreach ($this->sourceXml->nat->onetoone as $srcRule) {
-                $this_id = $this->genRuleId($srcRule);
                 if (!$this->hasInterface($srcRule->interface) && !$this->hasInterfaceGroup($srcRule->interface)) {
                     $this->importErrors[] = array(
-                        "name" => $this_id,
+                        "name" => !empty($srcRule->descr) ? (string)$srcRule->descr : "",
                         "details" => json_encode($srcRule),
                         "message" => "Interface not configured"
                       );
                     continue;
                 }
                 // add / update rule
-                $target = Config::getInstance()->object();
                 $nat = isset($target->nat) ? $target->nat : $target->addChild("nat");
-                $natEntry = null;
-                foreach ($nat->children() as $rule) {
-                    if ($this->genRuleId($rule) == $this_id) {
-                        $natEntry = $rule;
-                        break;
-                    }
-                }
-                if ($natEntry == null) {
-                    $natEntry = $nat->addChild("onetoone");
-                    $this->insertCount++;
-                } else {
-                    $this->updateCount++;
-                }
+                $natEntry = $nat->addChild("onetoone");
+                $this->insertCount++;
                 $this->replaceXmlNode($srcRule, $natEntry);
             }
             Config::getInstance()->save();

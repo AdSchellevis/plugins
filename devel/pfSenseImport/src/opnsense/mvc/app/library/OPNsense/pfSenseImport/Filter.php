@@ -34,26 +34,15 @@ use \OPNsense\Firewall\Util;
 class Filter extends ImportType
 {
 
-    private function genRuleId($rule)
-    {
-        $result = (!empty($rule->interface) ? $rule->interface : "?") . "|";
-        $result .= (!empty($rule->protocol) ? $rule->protocol : "?") . "|";
-        $result .= (!empty($rule->ipprotocol) ? $rule->ipprotocol : "inet") . "|";
-        $result .= !empty($rule->source) ? $this->pconfigToString($rule->source) : "?";
-        $result .= "->";
-        $result .= !empty($rule->destination) ? $this->pconfigToString($rule->destination) : "?";
-        $result .= !empty($rule->{"associated-rule-id"}) ? "|" . $rule->{"associated-rule-id"} : "";
-
-        return $result;
-    }
-
-
     public function import()
     {
         if (!empty($this->sourceXml->filter) && !empty($this->sourceXml->filter->rule)) {
             Config::getInstance()->lock();
+            $target = Config::getInstance()->object();
+            if (isset($target->filter->rule)) {
+                unset($target->filter->rule);
+            }
             foreach ($this->sourceXml->filter->rule as $srcRule) {
-                $this_id = $this->genRuleId($srcRule);
                 $floatingIntf = null;
                 if (!empty($srcRule->floating)) {
                     $floatingIntf = implode(",", $this->filterKnownInterfaces($srcRule->interface));
@@ -61,28 +50,16 @@ class Filter extends ImportType
                 if (!$this->hasInterface($srcRule->interface) && !$this->hasInterfaceGroup($srcRule->interface)
                       && empty($floatingIntf) && !empty($srcRule->interface)) {
                     $this->importErrors[] = array(
-                        "name" => $this_id,
+                        "name" => !empty($srcRule->descr) ? (string)$srcRule->descr : "",
                         "details" => json_encode($srcRule),
-                        "message" => "Interface not configured"
+                        "message" => "Interface not configured " . $srcRule->interface
                       );
                     continue;
                 }
                 // add / update rule
-                $target = Config::getInstance()->object();
                 $filter = isset($target->filter) ? $target->filter : $target->addChild("filter");
-                $filterEntry = null;
-                foreach ($filter->children() as $rule) {
-                    if ($this->genRuleId($rule) == $this_id) {
-                        $filterEntry = $rule;
-                        break;
-                    }
-                }
-                if ($filterEntry == null) {
-                    $filterEntry = $filter->addChild("rule");
-                    $this->insertCount++;
-                } else {
-                    $this->updateCount++;
-                }
+                $filterEntry = $filter->addChild("rule");
+                $this->insertCount++;
                 if (!empty($floatingIntf)) {
                     $srcRule->interface = $floatingIntf;
                 }

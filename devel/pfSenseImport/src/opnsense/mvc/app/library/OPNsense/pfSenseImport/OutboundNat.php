@@ -33,52 +33,30 @@ use \OPNsense\Firewall\Util;
 
 class OutboundNat extends ImportType
 {
-    private function genRuleId($rule)
-    {
-        $result = (!empty($rule->interface) ? $rule->interface : "?") . "|";
-        $result .= (!empty($rule->protocol) ? $rule->protocol : "?") . "|";
-        $result .= (!empty($rule->ipprotocol) ? $rule->ipprotocol : "inet") . "|";
-        $result .= !empty($rule->source) ? $this->pconfigToString($rule->source) : "?";
-        $result .= !empty($rule->sourceport) ? ":" . $rule->sourceport : ":?";
-        $result .= "->";
-        $result .= !empty($rule->destination) ? $this->pconfigToString($rule->destination) : "?";
-        $result .= !empty($rule->dstport) ? ":" . $rule->dstport : ":?";
-        return $result;
-    }
-
     public function import()
     {
         if (!empty($this->sourceXml->nat) && !empty($this->sourceXml->nat->outbound)
               && !empty($this->sourceXml->nat->outbound->rule)) {
             Config::getInstance()->lock();
             $target = Config::getInstance()->object();
+            if (isset($target->nat->outbound->rule)) {
+                unset($target->nat->outbound->rule);
+            }
             $nat = isset($target->nat) ? $target->nat : $target->addChild("nat");
             $outbound = isset($target->nat->outbound) ? $target->nat->outbound : $target->nat->addChild("outbound");
             $outbound->mode = $this->sourceXml->nat->outbound->mode;
             foreach ($this->sourceXml->nat->outbound->rule as $srcRule) {
-                $this_id = $this->genRuleId($srcRule);
                 if (!$this->hasInterface($srcRule->interface) && !$this->hasInterfaceGroup($srcRule->interface)) {
                     $this->importErrors[] = array(
-                        "name" => $this_id,
+                        "name" => !empty($srcRule->descr) ? (string)$srcRule->descr : "",
                         "details" => json_encode($srcRule),
-                        "message" => "Interface not configured"
+                        "message" => "Interface not configured " . $srcRule->interface
                       );
                     continue;
                 }
                 // add / update rule
-                $natEntry = null;
-                foreach ($outbound->children() as $rule) {
-                    if ($this->genRuleId($rule) == $this_id) {
-                        $natEntry = $rule;
-                        break;
-                    }
-                }
-                if ($natEntry == null) {
-                    $natEntry = $outbound->addChild("rule");
-                    $this->insertCount++;
-                } else {
-                    $this->updateCount++;
-                }
+                $natEntry = $outbound->addChild("rule");
+                $this->insertCount++;
                 if (isset($srcRule->nonat)) {
                     $srcRule->nonat = "1";
                 }

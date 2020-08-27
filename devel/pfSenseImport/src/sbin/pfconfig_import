@@ -29,13 +29,14 @@ require_once("script/load_phalcon.php");
 require_once("interfaces.lib.inc");
 
 
-$opts = getopt('aLIvVnhgoOf', array(), $optind);
+$opts = getopt('acLIvVnhgoOf', array(), $optind);
 $args = array_slice($argv, $optind);
 
 if (isset($opts['h']) || empty($args[0])) {
     echo "Usage: pfconfig_import [-h] -[a] <sourceXml>\n\n";
     echo "\t-h show this help text and exit\n";
     echo "\t-a Import aliases\n";
+    echo "\t-c Import certificates [ca,cert,crl]\n";
     echo "\t-I Import Interfaces\n";
     echo "\t-g Import Interface groups\n";
     echo "\t-L Import Laggs\n";
@@ -49,6 +50,7 @@ if (isset($opts['h']) || empty($args[0])) {
 }
 $importClasses = array(
     "a" => "\OPNsense\pfSenseImport\Alias",
+    "c" => "\OPNsense\pfSenseImport\Certificates",
     "V" => "\OPNsense\pfSenseImport\Vlan",
     "L" => "\OPNsense\pfSenseImport\Lagg",
     "I" => "\OPNsense\pfSenseImport\Intf",

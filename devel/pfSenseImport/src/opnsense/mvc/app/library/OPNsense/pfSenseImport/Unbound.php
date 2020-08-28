@@ -31,40 +31,30 @@ namespace OPNsense\pfSenseImport;
 use \OPNsense\Core\Config;
 use \OPNsense\Firewall\Util;
 
-class Certificates extends ImportType
+class Unbound extends ImportType
 {
     public function import()
     {
         Config::getInstance()->lock();
         $targetCfg = Config::getInstance()->object();
-        foreach (['cert', 'ca', 'crl'] as $cert_type) {
-            if (!empty($this->sourceXml->$cert_type)) {
-                foreach ($this->sourceXml->$cert_type as $node) {
-                    if (!empty($targetCfg->$cert_type)) {
-                        $certEntry = null;
-                        foreach ($targetCfg->$cert_type as $dst_node) {
-                            if ((string)$dst_node->refid === (string)$node->refid) {
-                                $certEntry = $dst_node;
-                            }
+        if (!empty($this->sourceXml->unbound)) {
+            $unbound_target = isset($targetCfg->unbound) ? $targetCfg->unbound : $targetCfg->addChild("unbound");
+            if (!empty($this->sourceXml->unbound->hosts)){
+                foreach ($this->sourceXml->unbound->hosts as $host) {
+                    $hostEntry = null;
+                    foreach ($unbound_target->hosts as $dst_host) {
+                        if ((string)$dst_host->host == (string)$host->host && (string)$dst_host->domain == (string)$host->domain) {
+                            $hostEntry =  $dst_host;
                         }
-                        if ($certEntry === null) {
-                            $certEntry = $targetCfg->addChild($cert_type);
-                            $this->insertCount++;
-                        } else {
-                            $this->updateCount++;
-                        }
-                        foreach (array_keys(iterator_to_array($node->children())) as $tagname) {
-                            /**
-                             * since https://github.com/pfsense/pfsense/commit/7c4c77ee62cf28ced5043761ece287d29d498cd7
-                             * pfSense seems to store the type of certificate, which doesn't have to reflect our reality
-                             * it seems. "Server: No" when <type>server</type>
-                             */
-                            if ($node->$tagname == "" || in_array($tagname, ['type'])) {
-                                unset($node->$tagname);
-                            }
-                        }
-                        $this->replaceXmlNode($node, $certEntry);
                     }
+                    if ($hostEntry == null) {
+                        $hostEntry = $unbound_target->addChild("host");
+                        $this->insertCount++;
+                    } else {
+                        $this->updateCount++;
+                    }
+                    $host->rr = strpos($host->ip, ":") === false ? "A" : "AAAA";
+                    $this->replaceXmlNode($host, $hostEntry);
                 }
             }
         }

@@ -29,7 +29,7 @@ require_once("script/load_phalcon.php");
 require_once("interfaces.lib.inc");
 
 
-$opts = getopt('acLIvVnhgoOfud', array(), $optind);
+$opts = getopt('aAcLIvVnhgGoOfuUd', array(), $optind);
 $args = array_slice($argv, $optind);
 
 if (isset($opts['h']) || empty($args[0])) {
@@ -48,6 +48,8 @@ if (isset($opts['h']) || empty($args[0])) {
     echo "\t-f Import filter rules\n";
     echo "\t-u Import Unbound (hosts)\n";
     echo "\t-d Import DNSMasq (hosts, domainoverrides)\n";
+    echo "\t-G Import User groups\n";
+    echo "\t-A Import all of the above\n";
     exit(0);
 }
 $importClasses = array(
@@ -63,11 +65,13 @@ $importClasses = array(
     "O" => "\OPNsense\pfSenseImport\NatOneToOne",
     "f" => "\OPNsense\pfSenseImport\Filter",
     "u" => "\OPNsense\pfSenseImport\Unbound",
-    "d" => "\OPNsense\pfSenseImport\DNSMasq"
+    "d" => "\OPNsense\pfSenseImport\DNSMasq",
+    "G" => "\OPNsense\pfSenseImport\Groups",
+    "U" => "\OPNsense\pfSenseImport\Users"
 );
 $ifdetails = legacy_interfaces_details();
 foreach ($importClasses as $tag => $cls) {
-    if (isset($opts[$tag])) {
+    if (isset($opts[$tag]) || isset($opts["A"])) {
         $imprt = new $cls($args[0]);
         $imprt->setInterfaceDetails($ifdetails);
         $imprt->import();

@@ -73,6 +73,9 @@ class Filter extends ImportType
                 if (isset($srcRule->tracker)) {
                     unset($srcRule->tracker);
                 }
+                if (isset($srcRule->icmptype) && trim((string)$srcRule->icmptype) == "any") {
+                    unset($srcRule->icmptype);
+                }
                 foreach (array_keys(iterator_to_array($srcRule->children())) as $tagname) {
                     if ($srcRule->$tagname == "") {
                         unset($srcRule->$tagname);

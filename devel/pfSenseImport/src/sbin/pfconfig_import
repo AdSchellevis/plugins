@@ -29,7 +29,7 @@ require_once("script/load_phalcon.php");
 require_once("interfaces.lib.inc");
 
 
-$opts = getopt('aAcLIvVnhgGoOfuUd', array(), $optind);
+$opts = getopt('aAcLIvVnhgGoOfuUdS', array(), $optind);
 $args = array_slice($argv, $optind);
 
 if (isset($opts['h']) || empty($args[0])) {
@@ -50,6 +50,7 @@ if (isset($opts['h']) || empty($args[0])) {
     echo "\t-d Import DNSMasq (hosts, domainoverrides)\n";
     echo "\t-U Import Users\n";
     echo "\t-G Import User groups\n";
+    echo "\t-S Attach user shells\n";
     echo "\t-A Import all of the above\n";
     exit(0);
 }
@@ -68,7 +69,8 @@ $importClasses = array(
     "u" => "\OPNsense\pfSenseImport\Unbound",
     "d" => "\OPNsense\pfSenseImport\DNSMasq",
     "G" => "\OPNsense\pfSenseImport\Groups",
-    "U" => "\OPNsense\pfSenseImport\Users"
+    "U" => "\OPNsense\pfSenseImport\Users",
+    "S" => "\OPNsense\pfSenseImport\UserShell"
 );
 $ifdetails = legacy_interfaces_details();
 foreach ($importClasses as $tag => $cls) {

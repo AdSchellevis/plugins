@@ -28,48 +28,23 @@
 */
 namespace OPNsense\pfSenseImport;
 
+use \OPNsense\Core\ACL;
 use \OPNsense\Core\Config;
 use \OPNsense\Firewall\Util;
 
-class Groups extends ImportType
+class UserShell extends ImportType
 {
     public function import()
     {
         Config::getInstance()->lock();
         $targetCfg = Config::getInstance()->object();
-        if (!empty($this->sourceXml->system->group)) {
-            $maxgid = (int)$targetCfg->system->nextgid;
-            foreach ($this->sourceXml->system->group as $node) {
-                $groupEntry = null;
-                foreach ($targetCfg->system->group as $dst_node) {
-                    if ((string)$dst_node->gid === (string)$node->gid) {
-                        $groupEntry = $dst_node;
-                    }
+        $acl = new ACL();
+        if (!empty($targetCfg->system->user)) {
+            foreach ($targetCfg->system->user as $node) {
+                if ((string)$node->name != "root" && $acl->hasPrivilege($node->name, "user-shell-access")) {
+                    $node->shell = (string)"/bin/tcsh";
                 }
-                if ($groupEntry === null) {
-                    $groupEntry = $targetCfg->system->addChild("group");
-                    $this->insertCount++;
-                } else {
-                    $this->updateCount++;
-                }
-                if (isset($node->priv)) {
-                    $privs = array();
-                    foreach ($node->priv as $priv) {
-                        if ((string)$priv == "system-xmlrpc-ha-sync") {
-                            $privs[] = "page-xmlrpclibrary";
-                        } else {
-                            $privs[] = (string)$priv;
-                        }
-                    }
-                    unset($node->priv);
-                    foreach ($privs as $priv) {
-                        $node->addChild("priv", $priv);
-                    }
-                }
-                $maxgid = max([$maxgid, (int)$node->gid + 1]);
-                $this->replaceXmlNode($node, $groupEntry);
             }
-            $targetCfg->system->nextgid = (string)$maxgid;
         }
         Config::getInstance()->save();
     }

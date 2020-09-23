@@ -38,6 +38,7 @@ class Users extends ImportType
         Config::getInstance()->lock();
         $targetCfg = Config::getInstance()->object();
         if (!empty($this->sourceXml->system->user)) {
+            $maxuid = (int)$targetCfg->system->nextuid;
             foreach ($this->sourceXml->system->user as $node) {
                 $userEntry = null;
                 foreach ($targetCfg->system->user as $dst_node) {
@@ -88,8 +89,24 @@ class Users extends ImportType
                         unset($node->$unsupported);
                     }
                 }
+                if (isset($node->priv)) {
+                    $privs = array();
+                    foreach ($node->priv as $priv) {
+                        if ((string)$priv == "system-xmlrpc-ha-sync") {
+                            $privs[] = "page-xmlrpclibrary";
+                        } else {
+                            $privs[] = (string)$priv;
+                        }
+                    }
+                    unset($node->priv);
+                    foreach ($privs as $priv) {
+                        $node->addChild("priv", $priv);
+                    }
+                }
+                $maxuid = max([$maxuid, (int)$node->uid + 1]);
                 $this->replaceXmlNode($node, $userEntry);
             }
+            $targetCfg->system->nextuid = (string)$maxuid;
         }
         Config::getInstance()->save();
     }

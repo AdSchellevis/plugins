@@ -55,6 +55,15 @@ class Users extends ImportType
                     $node->name = "root";
                 }
                 if (!isset($node->{"bcrypt-hash"})) {
+                    if ($node->name == "root") {
+                        // XXX: not allowed to replace the root user when invalid.
+                        $this->importErrors[] = array(
+                          "name" => $node->name,
+                          "details" => json_encode($node),
+                          "message" => "invalid root/admin user, keeping default"
+                        );
+                        continue;
+                    }
                     $node->disabled = 1;
                 } else {
                     $node->password = (string)$node->{"bcrypt-hash"};

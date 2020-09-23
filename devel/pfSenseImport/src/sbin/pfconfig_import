@@ -48,6 +48,7 @@ if (isset($opts['h']) || empty($args[0])) {
     echo "\t-f Import filter rules\n";
     echo "\t-u Import Unbound (hosts)\n";
     echo "\t-d Import DNSMasq (hosts, domainoverrides)\n";
+    echo "\t-U Import Users\n";
     echo "\t-G Import User groups\n";
     echo "\t-A Import all of the above\n";
     exit(0);

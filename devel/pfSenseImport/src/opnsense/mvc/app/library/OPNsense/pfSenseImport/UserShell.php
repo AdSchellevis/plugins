@@ -41,7 +41,10 @@ class UserShell extends ImportType
         $acl = new ACL();
         if (!empty($targetCfg->system->user)) {
             foreach ($targetCfg->system->user as $node) {
-                if ((string)$node->name != "root" && $acl->hasPrivilege($node->name, "user-shell-access")) {
+                if ((string)$node->name != "root" && (
+                      $acl->hasPrivilege($node->name, "user-shell-access") ||
+                      $acl->hasPrivilege($node->name, "page-all")
+                )) {
                     $node->shell = (string)"/bin/tcsh";
                 }
             }

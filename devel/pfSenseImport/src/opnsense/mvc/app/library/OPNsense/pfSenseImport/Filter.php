@@ -69,6 +69,9 @@ class Filter extends ImportType
                 if (isset($srcRule->log)) {
                     $srcRule->log = "1";
                 }
+                if (empty($srcRule->statetype)) {
+                    $srcRule->statetype = "keep state";
+                }
                 // remove pfSense specific and empty attributes
                 if (isset($srcRule->tracker)) {
                     unset($srcRule->tracker);

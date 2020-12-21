@@ -90,22 +90,27 @@ class Alias extends ImportType
                 $aliasUuidMap[$alias->getAttribute('uuid')] = (string)$srcAlias->name;
             }
             \OPNsense\Firewall\Util::attachAliasObject($aliasMdl);
-            foreach ($aliasMdl->performValidation() as $msg) {
-                $parts = explode('.', $msg->getField());
-                $uuid = $parts[count($parts)-2];
-                $this->importErrors[] = array(
-                    "uuid" => $uuid,
-                    "name" => $aliasUuidMap[$uuid],
-                    "details" => null,
-                    "message" => $msg->getMessage()
-                );
-            }
-            // remove invalid entries from set
-            foreach ($this->importErrors as $error) {
-                if (!empty($error['uuid'])) {
-                    $aliasMdl->aliases->alias->del($error['uuid']);
+            // recursive validation, when removing aliases from the list, others may be invalidated next
+            do {
+                $prev_error_count = count($this->importErrors);
+                foreach ($aliasMdl->performValidation() as $msg) {
+                    $parts = explode('.', $msg->getField());
+                    $uuid = $parts[count($parts)-2];
+                    $this->importErrors[] = array(
+                        "uuid" => $uuid,
+                        "name" => $aliasUuidMap[$uuid],
+                        "details" => null,
+                        "message" => $msg->getMessage()
+                    );
                 }
-            }
+                // remove invalid entries from set
+                foreach ($this->importErrors as $error) {
+                    if (!empty($error['uuid'])) {
+                        $aliasMdl->aliases->alias->del($error['uuid']);
+                    }
+                }
+            } while (count($this->importErrors) != $prev_error_count);
+
             $aliasMdl->serializeToConfig();
             Config::getInstance()->save();
         }
